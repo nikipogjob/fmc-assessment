@@ -1,4 +1,10 @@
-import "./globals.css";
+import type { Metadata } from 'next';
+import { AppProviders } from './providers';
+
+export const metadata: Metadata = {
+  title: 'Task Manager',
+  description: 'FMC assessment'
+};
 
 
 export default function RootLayout({
@@ -9,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body >
-        {children}
+        <AppProviders>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );
