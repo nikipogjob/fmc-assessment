@@ -1,12 +1,15 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { appSlice } from './app-slice';
+import { baseApi } from './api/base-api';
 
 const reducer = combineReducers({
-    [appSlice.name]: appSlice.reducer
+    [appSlice.name]: appSlice.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
 });
 
 export const store = configureStore({
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(baseApi.middleware),
     reducer
 });
 
