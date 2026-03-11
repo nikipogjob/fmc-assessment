@@ -1,9 +1,9 @@
 import { axiosInstance } from './axios-instance';
-import { AxiosError } from 'axios';
+import { AxiosError, Method } from 'axios';
 
 interface AxiosBaseQueryArgs {
     url: string,
-    method?: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+    method?: Method,
     data?: unknown,
     params?: unknown
 }
