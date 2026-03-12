@@ -1,5 +1,7 @@
-import { baseApi } from '@/shared/store/api/base-api';
+import { baseApi } from '@/shared/api/base-api';
 import { AuthSuccessResponse, AuthUser, LoginRequest, LogoutResponse, RegisterRequest } from '../model/types';
+import { authTokenStorage } from '@/shared/lib/storage/auth-token';
+import { clearAuth, setCredentials, setCurrentUser } from '../model/auth-slice';
 
 export const authApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -9,6 +11,16 @@ export const authApi = baseApi.injectEndpoints({
                 method: 'POST',
                 data: body
             }),
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    authTokenStorage.set(data.accessToken);
+                    dispatch(setCredentials(data));
+                } catch {
+                    authTokenStorage.remove();
+                    dispatch(clearAuth());
+                }
+            }
         }),
 
         login: builder.mutation<AuthSuccessResponse, LoginRequest>({
@@ -17,6 +29,16 @@ export const authApi = baseApi.injectEndpoints({
                 method: 'POST',
                 data: body,
             }),
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    authTokenStorage.set(data.accessToken);
+                    dispatch(setCredentials(data));
+                } catch {
+                    authTokenStorage.remove();
+                    dispatch(clearAuth());
+                }
+            }
         }),
 
         me: builder.query<AuthUser, void>({
@@ -25,6 +47,15 @@ export const authApi = baseApi.injectEndpoints({
                 method: 'GET',
             }),
             providesTags: ['Auth'],
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    dispatch(setCurrentUser(data));
+                } catch {
+                    authTokenStorage.remove();
+                    dispatch(clearAuth());
+                }
+            },
         }),
         logout: builder.mutation<LogoutResponse, void>({
             query: () => ({
@@ -32,6 +63,14 @@ export const authApi = baseApi.injectEndpoints({
                 method: 'POST',
             }),
             invalidatesTags: ['Auth'],
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                } finally {
+                    authTokenStorage.remove();
+                    dispatch(clearAuth());
+                }
+            }
         }),
     }),
 });
